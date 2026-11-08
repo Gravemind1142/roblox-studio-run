@@ -1,0 +1,27 @@
+[package]
+name = "studio-run"
+version = "0.1.0"
+edition = "2024"
+description = "Runs a Luau script in Roblox Studio on a hidden Windows desktop and reports the result through its exit code"
+license = "MIT"
+repository = "https://github.com/Gravemind1142/roblox-studio-run"
+readme = "README.md"
+keywords = ["roblox", "luau", "studio", "testing", "cli"]
+categories = ["command-line-utilities", "development-tools::testing"]
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Console",
+    "Win32_System_JobObjects",
+    "Win32_System_StationsAndDesktops",
+    "Win32_System_Threading",
+] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
