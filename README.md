@@ -1,10 +1,9 @@
 # studio-run
 
-Runs a Luau script in Roblox Studio from the command line, on a hidden Windows desktop, and reports the result through a reliable exit code. It works with any test runner.
+Runs a Luau script in Roblox Studio from the command line, on a hidden Windows desktop, and reports the result through a reliable exit code.
 
 ```powershell
-rojo build test.project.json --output output.rbxl
-studio-run --script game\ReplicatedStorage\Tests\run-tests.luau --place output.rbxl
+studio-run --script path\to\script.luau --place place.rbxl
 ```
 
 Studio still starts in full, so this is headless-like rather than truly headless. A run usually takes 8–15 seconds. Scripts run in edit mode with command bar permissions, so `RunService:IsRunning()` is `false`.
