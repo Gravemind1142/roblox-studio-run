@@ -1,0 +1,57 @@
+# Builds studio-run.exe and publishes it as a GitHub release when a version tag is pushed.
+#
+#   git tag v0.1.0
+#   git push origin v0.1.0
+#
+# The asset is named studio-run-<version>-windows-x86_64.zip with studio-run.exe at its root,
+# which is the layout Foreman, Aftman and Rokit look for. This job only builds and runs the
+# unit tests; the integration tests need a logged-in Studio and stay local.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches Cargo.toml
+        shell: pwsh
+        run: |
+          $version = (cargo metadata --no-deps --format-version 1 | ConvertFrom-Json).packages[0].version
+          $tag = "${{ github.ref_name }}"
+          if ($tag -ne "v$version") {
+            Write-Error "Tag $tag does not match the Cargo.toml version $version"
+            exit 1
+          }
+          "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Test
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets -- -D warnings
+          cargo test
+
+      - name: Build
+        run: cargo build --release --locked --target x86_64-pc-windows-msvc
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $zip = "studio-run-$env:VERSION-windows-x86_64.zip"
+          Compress-Archive -Path target\x86_64-pc-windows-msvc\release\studio-run.exe -DestinationPath $zip
+          "ZIP=$zip" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Publish
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" $env:ZIP --title "${{ github.ref_name }}" --generate-notes

@@ -15,6 +15,24 @@ Studio still starts in full, so this is headless-like rather than truly headless
 
 `studio-run.exe` is a single file with nothing else to install. It is meant for local use, not for CI.
 
+## Installing
+
+Each [GitHub release](https://github.com/Gravemind1142/roblox-studio-run/releases) has a `studio-run-<version>-windows-x86_64.zip` holding `studio-run.exe`. Download it by hand, or add it to a project's toolchain manager.
+
+[Foreman](https://github.com/Roblox/foreman) (`foreman.toml`):
+
+```toml
+[tools]
+studio-run = { github = "Gravemind1142/roblox-studio-run", version = "=0.1.0" }
+```
+
+[Rokit](https://github.com/rojo-rbx/rokit) (`rokit.toml`) or [Aftman](https://github.com/LPGhatguy/aftman) (`aftman.toml`):
+
+```toml
+[tools]
+studio-run = "Gravemind1142/roblox-studio-run@0.1.0"
+```
+
 ## Options
 
 | Option | Default | Purpose |
@@ -53,25 +71,3 @@ If Studio crashes or hangs after the script has finished, the result stands and 
 - **Hidden dialogs:** a login prompt or error dialog can't be seen or clicked on the hidden desktop, so the run ends in a timeout. Use `--visible` to check.
 - **Crash dumps:** Studio often crashes as it quits when run on the normal desktop, leaving dumps in `%LOCALAPPDATA%\Roblox\logs\crashes\reports`.
 - **Undocumented Studio behavior:** this tool relies on `--outputFile` needing an absolute `.log` path and on the format of Studio's output file. A Studio update could change either. Tested on Studio 0.746.
-
-## Building and testing
-
-Install Rust with [rustup](https://rustup.rs) and the Visual Studio C++ Build Tools. `rust-toolchain.toml` selects the stable toolchain with `rustfmt` and `clippy`. The release build creates `target\release\studio-run.exe`, which links the C runtime statically so it runs on its own.
-
-```powershell
-cargo build --release
-```
-
-The unit tests don't need Studio.
-
-```powershell
-cargo test
-cargo clippy --all-targets -- -D warnings
-cargo fmt --check
-```
-
-The integration tests open real Studio, so it must be installed and logged in.
-
-```powershell
-.\tests\run-integration.ps1
-```
